@@ -18,34 +18,77 @@
 
   <body>
     <script>
-      var scene = new THREE.Scene();
-      var camera = new THREE.PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        1000
-      );
+      // ページの読み込みを待つ
+      window.addEventListener("load", init);
+      function init() {
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          1000
+        );
 
-      var renderer = new THREE.WebGLRenderer();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.body.appendChild(renderer.domElement);
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-      var geometry = new THREE.BoxGeometry(1, 0.3, 1.5);
-      var material = new THREE.MeshBasicMaterial({
-        color: 0x6b4a4a
-      });
-      var cube = new THREE.Mesh(geometry, material);
-      scene.add(cube);
+        // 平行光源を作成
+        const directionalLight = new THREE.DirectionalLight(0xffffff);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+        // 環境光を作成
+        const ambientLight = new THREE.AmbientLight(0x999999);
+        scene.add(ambientLight);
+        scene.add(new THREE.GridHelper(600));
+        scene.add(new THREE.AxesHelper(300));
 
-      camera.position.z = 4;
+        // グループを作る
+        const group = new MyGroup();
+        // 3D空間にグループを追加する
+        scene.add(group);
 
-      function animate() {
-        requestAnimationFrame(animate);
-        cube.rotation.x += 0.01;
-        cube.rotation.y += 0.01;
-        renderer.render(scene, camera);
+        tick();
+        // 毎フレーム時に実行されるループイベントです
+        function tick() {
+          group.rotation.y += 0.01;
+          // レンダリング
+          renderer.render(scene, camera);
+          requestAnimationFrame(tick);
+        }
       }
-      animate();
+
+      /** グループを継承したサブクラス */
+      class MyGroup extends THREE.Group {
+        constructor() {
+          // 何かのクラスを継承した場合はsuper()を呼び出す必要がある
+          super();
+          const length = 10; // for文の回数
+          for (let i = 0; i < length; i++) {
+            var geometry = new THREE.CubeGeometry(20, 5, 30);
+            geometry.vertices[0].x *= 0.8;
+            geometry.vertices[0].z *= 0.8;
+            geometry.vertices[1].x *= 0.8;
+            geometry.vertices[1].z *= 0.8;
+            geometry.vertices[4].x *= 0.8;
+            geometry.vertices[4].z *= 0.8;
+            geometry.vertices[5].x *= 0.8;
+            geometry.vertices[5].z *= 0.8;
+            var material = new THREE.MeshBasicMaterial({
+              color: 0x6b4a4a
+            });
+            var mesh = new THREE.Mesh(geometry, material);
+            const radian = (i / length) * Math.PI * 2;
+            mesh.position.set(
+              200 * Math.cos(radian), // X座標
+              30, // Y座標
+              200 * Math.sin(radian) // Z座標
+            );
+            // グループに追加する
+            this.add(mesh);
+          }
+        }
+      }
     </script>
   </body>
 </html>
